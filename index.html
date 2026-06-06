@@ -72,6 +72,8 @@
   .hint{color:var(--dim);font-size:12px;margin-top:10px}
   .hint .pos{color:var(--green);font-weight:700} .hint .neg{color:var(--red);font-weight:700}
   .scrollx{overflow:auto}
+  .gif{display:block;max-width:480px;width:100%;height:auto;border-radius:10px;border:1px solid var(--line);margin:12px 0}
+  .gifcap{color:var(--dim);font-size:12px;margin:0 0 4px}
   #out{margin-top:10px}
   .status{font-size:15px;padding:14px 16px;border-radius:10px;margin-bottom:16px}
   .status.ok{background:rgba(95,185,138,.12);border:1px solid rgba(95,185,138,.4);color:var(--green)}
@@ -95,7 +97,7 @@
     <div>
       <h1 id="t-title"></h1>
       <div class="sub" id="t-sub"></div>
-      <img src="https://i.imgur.com/BQw57yL.png" >
+      <img class="gif" src="https://i.imgur.com/BQw57yL.png" alt="Lock: levers, initial combination and unlock pin">
     </div>
     <div class="lang">
       <button id="b-pl" onclick="setMode('adv','pl')">PL</button>
@@ -114,7 +116,8 @@
 
   <div class="card">
     <h2><span class="n">2</span><span id="t-s2"></span></h2>
-    <img src="https://i.imgur.com/F46aHSu.gif"> (and moves itself, always +1)
+    <p class="gifcap">Example: moving a lever pulls another the opposite way (and always moves itself, +1):</p>
+    <img class="gif" src="https://i.imgur.com/F46aHSu.gif" alt="lever 2 moves lever 4 opposite">
     <div class="scrollx"><table class="matrix"><tbody id="mtable"></tbody></table></div>
     <div class="hint" id="t-legend"></div>
   </div>
@@ -142,7 +145,8 @@
 
   <div style="text-align:center"><button id="go"></button></div>
   <div>
-    <img src="https://i.imgur.com/BoXE51P.gif">
+    <p class="gifcap" id="t-gifcap2" style="margin-top:14px"></p>
+    <img class="gif" src="https://i.imgur.com/2BgQW6b.gif" alt="example left move on a lever">
   </div>
   <div id="out"></div>
 </div>
@@ -162,6 +166,7 @@ const I18N={
     s4:'STARTOWY PIN KAŻDEJ KASETY',
     s5:'OTWARCIE NA PINIE', tgtlabel:'docelowy pin (wszystkie kasety)',
     go:'OBLICZ KOMBINACJĘ', solving:'LICZĘ…',
+    gifcap2:'Uwaga: w grze uchwyt jest odwrócony — w kombinacji poniżej PRAWO/LEWO są już ustawione tak, jak fizycznie ruszasz dźwignią w grze.',
     rowlab:n=>'RUCH KASETA '+n+' →', colh:n=>'KASETA '+n, startlab:n=>'KASETA '+n,
     th_move:'Ruch', start:'START', cassette:'KASETA', RIGHT:'PRAWO', LEFT:'LEWO',
     err_range:'Przedział błędny: min musi być mniejsze od max.',
@@ -186,6 +191,7 @@ const I18N={
     s4:'STARTING PIN OF EACH CASSETTE',
     s5:'OPEN AT PIN', tgtlabel:'target pin (all cassettes)',
     go:'SOLVE COMBINATION', solving:'SOLVING…',
+    gifcap2:'Note: the in-game handle is inverted — in the combination below, RIGHT/LEFT are already flipped to match how you physically turn the lever in the game.',
     rowlab:n=>'MOVE CASSETTE '+n+' →', colh:n=>'CASSETTE '+n, startlab:n=>'CASSETTE '+n,
     th_move:'Move', start:'START', cassette:'CASSETTE', RIGHT:'RIGHT', LEFT:'LEFT',
     err_range:'Invalid range: min must be less than max.',
@@ -209,6 +215,7 @@ const SIMPLE={
   nchint:'A lever moves along positions (pins). There are as many rows/columns as levers. Changing this rebuilds the table.',
   s4:'STARTING POSITION OF EACH LEVER',
   s5:'OPEN AT POSITION', tgtlabel:'target position (all levers)',
+  gifcap2:'Note: the in-game handle is inverted — in the combination below, RIGHT/LEFT are already flipped to match how you physically turn the lever in the game.',
   rowlab:n=>'LEVER '+n+' →', colh:n=>'LEVER '+n, startlab:n=>'LEVER '+n,
   cassette:'LEVER'
 };
@@ -232,6 +239,7 @@ function applyLang(){
   document.getElementById('t-s4').textContent=d.s4;
   document.getElementById('t-s5').textContent=d.s5;
   document.getElementById('t-tgtlabel').textContent=d.tgtlabel;
+  document.getElementById('t-gifcap2').textContent=d.gifcap2;
   document.getElementById('go').textContent=d.go;
   document.getElementById('b-pl').classList.toggle('active',mode==='adv'&&LANG==='pl');
   document.getElementById('b-en').classList.toggle('active',mode==='adv'&&LANG==='en');
@@ -388,7 +396,8 @@ function render(res){
   for(let j=0;j<nc;j++)ph.push(`<th>${pre}${j+1}</th>`);
   let rows=`<tr class="start-state"><td class="lab">${d.start}</td><td>—</td>`+res.start.map(v=>`<td>${v}</td>`).join('')+`</tr>`;
   steps.forEach((s,i)=>{
-    const dir=s.dir===0?d.RIGHT:d.LEFT; const cls=s.dir===0?'dir-P':'dir-L';
+    // In-game handle is inverted: flip the DISPLAYED direction only (pin math unchanged).
+    const dir=s.dir===0?d.LEFT:d.RIGHT; const cls=s.dir===0?'dir-L':'dir-P';
     rows+=`<tr><td class="lab">${i+1}</td><td><span class="k">${d.cassette} ${s.c+1}</span> → <span class="${cls}">${dir}</span></td>`+
       s.state.map(v=>`<td>${v}</td>`).join('')+`</tr>`;
   });
